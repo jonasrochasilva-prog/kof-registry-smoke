@@ -14,7 +14,7 @@ jobs:
       - name: Build artifact ONCE
         run: |
           mkdir pkg
-          printf 'kof lab artifact\ncommit=%s\nrun=%s\n' "$GITHUB_SHA" "$GITHUB_RUN_NUMBER" > pkg/README.txt
+          printf 'kof lab artifact\nworkflow=%s\ncommit=%s\nrun=%s\n' "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_RUN_NUMBER" > pkg/README.txt
           tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 -czf "lab-pinned-${GITHUB_RUN_NUMBER}.tar.gz" -C pkg .
           sha256sum lab-pinned-*.tar.gz | tee SHA256SUMS
       - name: Attest build provenance
