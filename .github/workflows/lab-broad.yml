@@ -1,0 +1,28 @@
+# LAB (Onda 2 da MD V6) — variante LARGA: espelha a forma do release.yml do Kof4j
+# (contents: write no workflow inteiro; actions por TAG). Repo de smoke pessoal, fora do Kof4j.
+name: lab-broad
+on: workflow_dispatch
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build artifact
+        run: |
+          mkdir pkg
+          printf 'kof lab artifact\ncommit=%s\nrun=%s\n' "$GITHUB_SHA" "$GITHUB_RUN_NUMBER" > pkg/README.txt
+          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 -czf "lab-broad-${GITHUB_RUN_NUMBER}.tar.gz" -C pkg .
+          sha256sum lab-broad-*.tar.gz | tee SHA256SUMS
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: 'lab-broad-*.tar.gz'
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "lab-broad-${GITHUB_RUN_NUMBER}" lab-broad-*.tar.gz SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" --title "lab-broad ${GITHUB_RUN_NUMBER}" --notes "attestation lab (broad token, tag refs)"
